@@ -31,13 +31,19 @@ percentFemaleWorkers = 50;
 percentMaleWorkers = 50;
 cycleTime = 100;
 
+
+
+//  Constant to determine whether the user is entering data is metric form or not - CLS
+const isUnitMetric = false
+
+
+
 testModifier = 1.0;
 
 // ARRAY of Z-Statistic values for p = 1-100.
 const pValue = [
     -2.33, -2.05, -1.88, -1.75, -1.64, -1.55, -1.48, -1.41, -1.34, -1.28, -1.23, -1.18, -1.13, -1.08, -1.04, -0.99, -0.95, -0.92, -0.88, -0.84, -0.81, -0.77, -0.74, -0.71, -0.67, -0.64, -0.61, -0.58, -0.55, -0.52, -0.50, -0.47, -0.44, -0.41, -0.39, -0.36, -0.33, -0.31, -0.28, -0.25, -0.23, -0.20, -0.18, -0.15, -0.13, -0.10, -0.08, -0.05, -0.03, 0, 0.03, 0.05, 0.08, 0.10, 0.13, 0.15, 0.18, 0.20, 0.23, 0.25, 0.28, 0.31, 0.33, 0.36, 0.39, 0.41, 0.44, 0.47, 0.50, 0.52, 0.55, 0.58, 0.61, 0.64, 0.67, 0.71, 0.74, 0.77, 0.81, 0.84, 0.88, 0.92, 0.95, 0.99, 1.04, 1.08, 1.13, 1.18, 1.23, 1.28, 1.34, 1.41, 1.48, 1.55, 1.64, 1.75, 1.88, 2.05, 2.33, 3.09
 ];
-
 
 
 /*  INPUT
@@ -58,22 +64,69 @@ const pValue = [
 
 
 const input = [
-    {   
-        name: "Task One",
+    {
+        name: "Task One (Imperial)",
         hand: "Right",
 
         forceDirection: "Up",
         isStanding: true,
-        verticalHeight: "1.5494", // meters
-        lateralDistanceFromShoulder: "0", // meters
-        lateralDirectionFromShoulder: "Centered",
-        horizontalDistanceFromShoulder: "0.4724", // meters
+        verticalHeight: "37.81", // inches - waist
+        lateralDistanceFromShoulder: "7.05", // inches 
+        lateralDirectionFromShoulder: "Outside",
+        horizontalDistanceFromShoulder: "7.01", // inches
 
         forceCount: "1",
-        forceMagnitude: "14.4482", // N
+        forceMagnitude: "1", // lbs
+        forceDuration: "1"
+    },
+    {
+        name: "Task Two",
+        hand: "Left",
+
+        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+        forceDirection: "Away",
+        isStanding: true,
+        verticalHeight: "40.81",
+        lateralDistanceFromShoulder: "0",
+        lateralDirectionFromShoulder: "Centered",
+        horizontalDistanceFromShoulder: "0.83",
+
+        forceCount: "1",
+        forceMagnitude: "1",
+        forceDuration: "1"
+    },
+    {
+        name: "Task Three",
+        hand: "Right",
+
+        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+        forceDirection: "In",
+        isStanding: true,
+        verticalHeight: "54",
+        lateralDistanceFromShoulder: "9.06",
+        lateralDirectionFromShoulder: "Outside",
+        horizontalDistanceFromShoulder: "0",
+
+        forceCount: "1",
+        forceMagnitude: "1",
+        forceDuration: "1"
+    },
+    {
+        name: "Task Four",
+        hand: "Left",
+
+        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+        forceDirection: "Down",
+        isStanding: true,
+        verticalHeight: "61.1",
+        lateralDistanceFromShoulder: "7.9",
+        lateralDirectionFromShoulder: "Inside",
+        horizontalDistanceFromShoulder: "15.28",
+
+        forceCount: "1",
+        forceMagnitude: "1",
         forceDuration: "1"
     }
-        
 ]
 
 /*  END INPUT - CLS
@@ -204,7 +257,72 @@ function createTask(input) {
 
     let output = new Array()
 
-    for(i = 0; i < input.length; i++) {
+    for(let i = 0; i < input.length; i++) {
+
+
+        //---------------------------------------------------------------
+        // Start log
+
+        console.log("Task", i+1)
+        console.log("...")
+        console.log("Part a: processing task information from user input")
+        console.log("________________________________")
+        console.log("Task name:", input[i].name)
+        console.log("Hand:", input[i].hand)
+        console.log("Posture (is user standing):", input[i].isStanding)
+        console.log("Force direction:", input[i].forceDirection)
+        if(isUnitMetric){
+            console.log("Vertical hand height from floor (meters):", input[i].verticalHeight)
+        }else{
+            console.log("Vertical hand height from floor (inches):", input[i].verticalHeight)
+        }
+        console.log("Lateral hand position:", input[i].lateralDirectionFromShoulder)
+        if(isUnitMetric){
+            console.log("Lateral hand distance from shoulder (meters):", input[i].lateralDistanceFromShoulder)
+            console.log("Horizontal hand distance from shoulder (meters):", input[i].horizontalDistanceFromShoulder)
+            console.log("Magnitude of force (Newtons):", input[i].forceMagnitude)
+        }else{
+            console.log("Lateral hand distance from shoulder (inches):", input[i].lateralDistanceFromShoulder)
+            console.log("Horizontal hand distance from shoulder (meters):", input[i].horizontalDistanceFromShoulder)
+            console.log("Magnitude of force (lbs):", input[i].forceMagnitude)
+        }
+        console.log("Duration of force application (sec):", input[i].forceDuration)
+        console.log("Number of times the force is carried out:", input[i].forceCount)
+        console.log("...")
+
+        // End log
+        //---------------------------------------------------------------
+
+        if (!isUnitMetric){
+            
+            input[i].horizontalDistanceFromShoulder = input[i].horizontalDistanceFromShoulder*inchToMeterRatio
+            input[i].verticalHeight = input[i].verticalHeight*inchToMeterRatio
+            input[i].lateralDistanceFromShoulder = input[i].lateralDistanceFromShoulder*inchToMeterRatio
+
+            input[i].forceMagnitude = input[i].forceMagnitude/newtonsToPoundsRatio
+        }
+
+
+        //---------------------------------------------------------------
+        // Start log
+
+        console.log("Part b: checking to see if any conversions are necessary")
+        console.log("________________________________")
+        if(!isUnitMetric){
+            console.log("You entered input in imperial units (inches and lbs)")
+            console.log("Converted horizontal hand distance from shoulder (=> meters):", input[i].horizontalDistanceFromShoulder)
+            console.log("Converted vertical hand height from floor (=> meters):", input[i].verticalHeight)
+            console.log("Converted lateral hand distance from shoulder (=> meters):", input[i].lateralDistanceFromShoulder)
+            console.log("Converted the magnitude value forceMagnitude (=> Newtons):", input[i].forceMagnitude)
+        }else{
+            console.log("You entered input in metric units (meters and newtons)")
+            console.log("No conversion necessary")
+        }
+        console.log("...")
+
+        // End log
+        //---------------------------------------------------------------
+
 
         h = 0
         v = 0
@@ -232,24 +350,39 @@ function createTask(input) {
         }
 
         //---------------------------------------------------------------
-        // Logging - for my use
+        //  Start log
 
-        console.log("Task: ", i+1)
-        console.log("h: ", h)
-        console.log("v: ", v)
-        console.log("l: ", l)
+        console.log("Part c: calculating the hand coordinates h, v, and l")
+        console.log("________________________________")
+        console.log("Calculated horizontal hand position h (meters): ", h)
+        console.log("Calculated vertical hand position v (meters): ", v)
+        console.log("Calculated lateral hand position l (meters): ", l)
 
+        //  End log
         //---------------------------------------------------------------
-        // For determining if the arm is too far from the body
+
+        
 
         const d = Math.sqrt(h**2 + v**2 + l**2) // m
-        
-        console.log("d: sqrt(h^2 + v^2 + l^2) =", d) 
-        if(d > maxFemaleArmLength) {
-            console.log("Possible error, hand too far from body.")
-        }
-        // Absolute length from the shoulder to the hand
 
+
+
+        //---------------------------------------------------------------
+        //  Start log
+
+        console.log("Part d: calculating absolute hand distance from shoulder to see if this position is possible")
+        console.log("________________________________")
+        console.log("Absolute distance from shoulder to hand d (meters): sqrt(h^2 + v^2 + l^2) =", d)
+        console.log("Absolute distance (inches) =", d/inchToMeterRatio)
+        console.log("Percentage of AVERAGE arm length:", (d/averageFemaleArmLength)*100)
+        if(d > maxFemaleArmLength) {
+            console.log("Possible error, hand too far from body")
+        }else{
+            console.log("This hand position is reasonable")
+        }
+        console.log("...")
+
+        //  End log
         //---------------------------------------------------------------
 
         let temp = 0
@@ -282,16 +415,26 @@ function createTask(input) {
         const maleMean = (temp*(1.5)) // N
         const maleStdDev = (maleMean*(0.3)) // N
 
-        //---------------------------------------------------------------
-        // Logging - for my use
 
-        console.log("Female mean: ", femaleMean)
-        console.log("Female sd: ", femaleStdDev)
-        console.log("Male mean: ", maleMean)
-        console.log("Male sd: ", maleStdDev)
-        console.log("-------------------------")
 
         //---------------------------------------------------------------
+        //  Start log
+
+        console.log("Part e: using the formulas from the paper to calculate the mean and standard devaiation values")
+        console.log("________________________________")
+
+        console.log("Female mean (meters): ", femaleMean)
+        console.log("Female sd (meters): ", femaleStdDev)
+        console.log("Male mean (meters): ", maleMean)
+        console.log("Male sd (meters): ", maleStdDev)
+        console.log("...")
+
+        console.log("Part f: creating the 'task' output object and pushing it to the output array")
+        console.log("________________________________")
+        
+        //  End log
+        //---------------------------------------------------------------
+
 
         let task = new Object()
 
@@ -306,6 +449,17 @@ function createTask(input) {
         task.MaleStdDev = maleStdDev // N
         task.FemaleMean = femaleMean // N
         task.FemaleStdDev = femaleStdDev // N
+
+        //---------------------------------------------------------------
+        //  Start log
+
+        console.log("Output:", task)
+        console.log("...")
+        console.log("...")
+        console.log("...")
+
+        //  End log
+        //---------------------------------------------------------------
 
         output.push(task)
     }
@@ -325,12 +479,15 @@ function createTask(input) {
 
 */
 
-const averageFemaleShoulderHeight = 1.3716 // meters
-const averageFemaleTorsoLength = 0.5588 // Found on the internet? in meters
-const maxFemaleArmLength = 0.762 // Suggested by Murray - in meters
+const averageFemaleShoulderHeight = 1.3716 // meters = 54 inches
+const averageFemaleTorsoLength = 0.5588 // Found on the internet? in meters = 22 inches
+const maxFemaleArmLength = 0.762 // Suggested by Murray - in meters = 30 inches
+const averageFemaleArmLength = 0.6
 
-// const inchToMeterRatio = 0.0254
-// const newtonsToPoundsRatio = 0.224809
+const inchToMeterRatio = 0.0254
+const newtonsToPoundsRatio = 0.224809
+
+
 
 const tasks = createTask(input)
 
