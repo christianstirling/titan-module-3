@@ -1,18 +1,28 @@
 const inputTemplate = [
-    {
-        name: "",
-        hand: "",
 
-        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
-        forceDirection: "Up ? Down ? Away ? To ? In ? Out",
-        isStanding: true,
-        verticalHeight: "9999",
-        lateralDistanceFromShoulder: "9999",
-        lateralDirectionFromShoulder: "Inside ? Centered ? Outside",
-        horizontalDistanceFromShoulder: "9999",
+    {
+        taskName: "",
+        hand: "Right",
+        posture: "Standing ? Sitting",
+
+        // forceDirection: "Superior = Up ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+        // Superior = Up
+        // Inferior = Down
+        // Anterior = Away
+        // Posterior = Toward
+        // Medial = Inward
+        // Lateral = Outward
+
+        forceDirection: "Up ? Down ? Away ? Toward ? Inward ? Outward",
+
+        
+        handPosition_verticalHeight: "9999", // inches
+        handPosition_horizontalDistance: "9999", // inches
+        handPosition_lateralDirection: "Inside ? Centered ? Outside", // inches 
+        handPosition_lateralDistance: "9999",
 
         forceCount: "9999",
-        forceMagnitude: "9999",
+        forceMagnitude: "9999", // lbs
         forceDuration: "9999"
     }
 ]

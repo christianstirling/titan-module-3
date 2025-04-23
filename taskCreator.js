@@ -56,63 +56,65 @@ const isUnitMetric = false
 
 const input = [
     {
-        name: "Task One (Imperial)",
+        taskName: "Task One (Imperial)",
         hand: "Right",
+        posture: "Standing",
 
         forceDirection: "Up",
-        isStanding: true,
-        verticalHeight: "37.81", // inches - waist
-        lateralDistanceFromShoulder: "7.05", // inches 
-        lateralDirectionFromShoulder: "Outside",
-        horizontalDistanceFromShoulder: "7.01", // inches
+
+        
+        handPosition_verticalHeight: "37.81", // inches
+        handPosition_horizontalDistance: "7.01", // inches
+        handPosition_lateralDirection: "Outside", // inches 
+        handPosition_lateralDistance: "7.05",
 
         forceCount: "1",
         forceMagnitude: "1", // lbs
         forceDuration: "1"
     },
-    {
-        name: "Task Two",
-        hand: "Left",
 
-        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+
+    
+    {
+        taskName: "Task Two",
+        hand: "Left",
+        posture: "Standing",
         forceDirection: "Away",
-        isStanding: true,
-        verticalHeight: "40.81",
-        lateralDistanceFromShoulder: "0",
-        lateralDirectionFromShoulder: "Centered",
-        horizontalDistanceFromShoulder: "0.83",
+
+        handPosition_verticalHeight: "40.81",
+        handPosition_horizontalDistance: "0.83",
+        handPosition_lateralDirection: "Centered",
+        handPosition_lateralDistance: "0",
 
         forceCount: "1",
         forceMagnitude: "1",
         forceDuration: "1"
     },
     {
-        name: "Task Three",
+        taskName: "Task Three",
         hand: "Right",
+        posture: "Standing",
+        forceDirection: "Inward",
 
-        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
-        forceDirection: "In",
-        isStanding: true,
-        verticalHeight: "54",
-        lateralDistanceFromShoulder: "9.06",
-        lateralDirectionFromShoulder: "Outside",
-        horizontalDistanceFromShoulder: "0",
+        handPosition_verticalHeight: "54",
+        handPosition_horizontalDistance: "0",
+        handPosition_lateralDirection: "Outside",
+        handPosition_lateralDistance: "9.29",
 
         forceCount: "1",
         forceMagnitude: "1",
         forceDuration: "1"
     },
     {
-        name: "Task Four",
+        taskName: "Task Four",
         hand: "Left",
-
-        // forceDirection: "Superior ? Inferior ? Anterior ? Posterior ? Medial ? Lateral",
+        posture: "Standing",
         forceDirection: "Down",
-        isStanding: true,
-        verticalHeight: "61.1",
-        lateralDistanceFromShoulder: "7.9",
-        lateralDirectionFromShoulder: "Inside",
-        horizontalDistanceFromShoulder: "15.28",
+
+        handPosition_verticalHeight: "61.1",
+        handPosition_horizontalDistance: "15.28",
+        handPosition_lateralDirection: "Inside",
+        handPosition_lateralDistance: "7.9",
 
         forceCount: "1",
         forceMagnitude: "1",
@@ -217,23 +219,31 @@ function createTask(input) {
         console.log("...")
         console.log("Part a: processing task information from user input")
         console.log("________________________________")
-        console.log("Task name:", input[i].name)
+        console.log("Task name:", input[i].taskName)
         console.log("Hand:", input[i].hand)
-        console.log("Posture (is user standing):", input[i].isStanding)
+        console.log("Posture:", input[i].posture)
         console.log("Force direction:", input[i].forceDirection)
         if(isUnitMetric){
-            console.log("Vertical hand height from floor (meters):", input[i].verticalHeight)
+            if(input[i].posture === "Standing") {
+                console.log("Vertical hand height from floor (meters):", input[i].handPosition_verticalHeight)
+            } else {
+                console.log("Vertical hand height from seat of chair (meters):", input[i].handPosition_verticalHeight)
+            }
+            console.log("Horizontal hand distance from shoulder (meters):", input[i].handPosition_horizontalDistance)
         }else{
-            console.log("Vertical hand height from floor (inches):", input[i].verticalHeight)
+            if(input[i].posture === "Standing") {
+                console.log("Vertical hand height from floor (inches):", input[i].handPosition_verticalHeight)
+            } else {
+                console.log("Vertical hand height from seat of chair (inches):", input[i].handPosition_verticalHeight)
+            }
+            console.log("Horizontal hand distance from shoulder (meters):", input[i].handPosition_horizontalDistance)
         }
-        console.log("Lateral hand position:", input[i].lateralDirectionFromShoulder)
+        console.log("Lateral hand position:", input[i].handPosition_lateralDirection)
         if(isUnitMetric){
-            console.log("Lateral hand distance from shoulder (meters):", input[i].lateralDistanceFromShoulder)
-            console.log("Horizontal hand distance from shoulder (meters):", input[i].horizontalDistanceFromShoulder)
+            console.log("Lateral hand distance from shoulder (meters):", input[i].handPosition_lateralDistance)
             console.log("Magnitude of force (Newtons):", input[i].forceMagnitude)
         }else{
-            console.log("Lateral hand distance from shoulder (inches):", input[i].lateralDistanceFromShoulder)
-            console.log("Horizontal hand distance from shoulder (meters):", input[i].horizontalDistanceFromShoulder)
+            console.log("Lateral hand distance from shoulder (inches):", input[i].handPosition_lateralDistance)
             console.log("Magnitude of force (lbs):", input[i].forceMagnitude)
         }
         console.log("Duration of force application (sec):", input[i].forceDuration)
@@ -245,9 +255,9 @@ function createTask(input) {
 
         if (!isUnitMetric){
             
-            input[i].horizontalDistanceFromShoulder = input[i].horizontalDistanceFromShoulder*inchToMeterRatio
-            input[i].verticalHeight = input[i].verticalHeight*inchToMeterRatio
-            input[i].lateralDistanceFromShoulder = input[i].lateralDistanceFromShoulder*inchToMeterRatio
+            input[i].handPosition_verticalHeight = input[i].handPosition_verticalHeight*inchToMeterRatio
+            input[i].handPosition_horizontalDistance = input[i].handPosition_horizontalDistance*inchToMeterRatio
+            input[i].handPosition_lateralDistance = input[i].handPosition_lateralDistance*inchToMeterRatio
 
             input[i].forceMagnitude = input[i].forceMagnitude/newtonsToPoundsRatio
         }
@@ -260,9 +270,9 @@ function createTask(input) {
         console.log("________________________________")
         if(!isUnitMetric){
             console.log("You entered input in imperial units (inches and lbs)")
-            console.log("Converted horizontal hand distance from shoulder (=> meters):", input[i].horizontalDistanceFromShoulder)
-            console.log("Converted vertical hand height from floor (=> meters):", input[i].verticalHeight)
-            console.log("Converted lateral hand distance from shoulder (=> meters):", input[i].lateralDistanceFromShoulder)
+            console.log("Converted vertical hand height from floor (=> meters):", input[i].handPosition_verticalHeight)
+            console.log("Converted horizontal hand distance from shoulder (=> meters):", input[i].handPosition_horizontalDistance)
+            console.log("Converted lateral hand distance from shoulder (=> meters):", input[i].handPosition_lateralDistance)
             console.log("Converted the magnitude value forceMagnitude (=> Newtons):", input[i].forceMagnitude)
         }else{
             console.log("You entered input in metric units (meters and newtons)")
@@ -274,27 +284,29 @@ function createTask(input) {
         //---------------------------------------------------------------
 
 
-        h = 0
         v = 0
+        h = 0
         l = 0
                 
-        h = input[i].horizontalDistanceFromShoulder // m
+        
 
-        if(input[i].isStanding) {
-            v = ((input[i].verticalHeight) - (averageFemaleShoulderHeight)) // m
+        if(input[i].posture === "Standing") {
+            v = ((input[i].handPosition_verticalHeight) - (averageFemaleShoulderHeight)) // m
         } else {
-            v = ((input[i].verticalHeight) - (averageFemaleTorsoLength)) // m
+            v = ((input[i].handPosition_verticalHeight) - (averageFemaleTorsoLength)) // m
         }
 
-        switch (input[i].lateralDirectionFromShoulder) {
+        h = input[i].handPosition_horizontalDistance // m
+
+        switch (input[i].handPosition_lateralDirection) {
             case 'Inside':
-                l = ((-1)*(input[i].lateralDistanceFromShoulder)) // m
+                l = ((-1)*(input[i].handPosition_lateralDistance)) // m
                 break
             case 'Centered':
                 l = 0
                 break
             case 'Outside':
-                l = input[i].lateralDistanceFromShoulder // m
+                l = input[i].handPosition_lateralDistance // m
                 break
             default:
         }
@@ -302,10 +314,10 @@ function createTask(input) {
         //---------------------------------------------------------------
         //  Start log
 
-        console.log("Part c: calculating the hand coordinates h, v, and l")
+        console.log("Part c: calculating the hand coordinates v, h, and l")
         console.log("________________________________")
-        console.log("Calculated horizontal hand position h (meters): ", h)
         console.log("Calculated vertical hand position v (meters): ", v)
+        console.log("Calculated horizontal hand position h (meters): ", h)
         console.log("Calculated lateral hand position l (meters): ", l)
 
         //  End log
@@ -313,7 +325,7 @@ function createTask(input) {
 
         
 
-        const d = Math.sqrt(h**2 + v**2 + l**2) // m
+        const absoluteHandDistance = Math.sqrt(h**2 + v**2 + l**2) // m
 
 
 
@@ -322,10 +334,10 @@ function createTask(input) {
 
         console.log("Part d: calculating absolute hand distance from shoulder to see if this position is possible")
         console.log("________________________________")
-        console.log("Absolute distance from shoulder to hand d (meters): sqrt(h^2 + v^2 + l^2) =", d)
-        console.log("Absolute distance (inches) =", d/inchToMeterRatio)
-        console.log("Percentage of AVERAGE arm length:", (d/averageFemaleArmLength)*100)
-        if(d > maxFemaleArmLength) {
+        console.log("Absolute distance from shoulder to hand d (meters): sqrt(h^2 + v^2 + l^2) =", absoluteHandDistance)
+        console.log("Absolute distance (inches) =", absoluteHandDistance/inchToMeterRatio)
+        console.log("Percentage of AVERAGE arm length:", (absoluteHandDistance/averageFemaleArmLength)*100)
+        if(absoluteHandDistance > maxFemaleArmLength) {
             console.log("Possible error, hand too far from body")
         }else{
             console.log("This hand position is reasonable")
@@ -347,13 +359,13 @@ function createTask(input) {
             case 'Away': //Anterior
                 temp = (96.2 - 43.06*(v) - 31.34*(l) - 126.96*(v**2) + 181.93*(h**2) - 283.74*(l**2) + 147.23*(v**3) + 373.58*(l**3) + 32.08*(l*v))
                 break
-            case 'To': //Posterior
+            case 'Toward': //Posterior
                 temp = (98.9 - 36.73(l) - 139.18*(v**2) + 456.95*(h**2) - 391.98(l**2) - 496.04*(h**3) + 607.89*(l**3) - 171.07*(h*v) - 58.8*(l*v))
                 break
-            case 'In': //Medial
+            case 'Inward': //Medial
                 temp = (95.1 - 123.58*(v**2) - 226.49*(h**3) + 347.73*(l**3) - 61.24*(h*v) - 179.04*(l*v))
                 break
-            case 'Out': //Lateral
+            case 'Outward': //Lateral
                 temp = (55.4 + 68.94*(h) + 87.23*(l) - 315.53*(h**3) - 293.33*(h*l) + 45.4*(h*v))
                 break
             default:
@@ -389,7 +401,7 @@ function createTask(input) {
         let task = new Object()
 
         task.Task = (i + 1)
-        task.TaskName = input[i].name
+        task.TaskName = input[i].taskName
         task.Hand = input[i].hand
         task.ForceMagnitude = input[i].forceMagnitude // N
         task.ForceCount = input[i].forceCount
