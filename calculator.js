@@ -68,33 +68,24 @@ const input = [
         taskName: "Task One (Imperial)",
         hand: "Right",
         posture: "Standing",
-
         forceDirection: "Up",
-
-        
         handPosition_verticalHeight: "37.81", // inches
         handPosition_horizontalDistance: "7.01", // inches
-        handPosition_lateralDirection: "Outside", // inches 
-        handPosition_lateralDistance: "7.05",
-
+        handPosition_lateralDirection: "Outside", 
+        handPosition_lateralDistance: "7.05", // inches 
         forceCount: "1",
         forceMagnitude: "1", // lbs
         forceDuration: "1"
     },
-
-
-    
     {
         taskName: "Task Two",
         hand: "Left",
         posture: "Standing",
         forceDirection: "Away",
-
         handPosition_verticalHeight: "40.81",
         handPosition_horizontalDistance: "0.83",
         handPosition_lateralDirection: "Centered",
         handPosition_lateralDistance: "0",
-
         forceCount: "1",
         forceMagnitude: "1",
         forceDuration: "1"
@@ -104,12 +95,10 @@ const input = [
         hand: "Right",
         posture: "Standing",
         forceDirection: "Inward",
-
         handPosition_verticalHeight: "54",
         handPosition_horizontalDistance: "0",
         handPosition_lateralDirection: "Outside",
         handPosition_lateralDistance: "9.29",
-
         forceCount: "1",
         forceMagnitude: "1",
         forceDuration: "1"
@@ -119,12 +108,10 @@ const input = [
         hand: "Left",
         posture: "Standing",
         forceDirection: "Down",
-
         handPosition_verticalHeight: "61.1",
         handPosition_horizontalDistance: "15.28",
         handPosition_lateralDirection: "Inside",
         handPosition_lateralDistance: "7.9",
-
         forceCount: "1",
         forceMagnitude: "1",
         forceDuration: "1"
@@ -172,7 +159,7 @@ function screenNotEnoughTimeInCycle(taskInputs, hand_s) {
     }
 }
 
-/* createTasks FUNCTIONS
+/*  FUNCTIONS 
 
     1.  createTask 
 
@@ -181,81 +168,38 @@ function screenNotEnoughTimeInCycle(taskInputs, hand_s) {
         an output array containing all of the information needed to perform the percent fatigued
         and metric contribution calculations.
 
-        The function can be conceptually broken down into 3 parts, a.) determining the h, v, and l
-        coordinate values; b.) calculating the mean and standard deviation pairs; c.) creating 
-        the output task array of objects.
+        The function can be conceptually broken down into 3 parts, 
+            a.) convert input units to metric (if necessary)
+            b.) determining the horizontal, vertical, and lateral coordinate values; 
+            c,) calculating the absolute distance of the hand to check if input is valid
+            d.) calculating the mean and standard deviation values; 
+            c.) creating the output task array of objects.
 
         Most of the function runs within a loop that iterates through each input object
-        of the input function.
+        of the input function.  At the end (once the loop ends), the full output array is returned.
 
-        Part a: 
-            h (horizontal position of the hand relative to the shoulder), 
-            v (vertical), and 
-            l (lateral)
-
-            These three variables make up the coordinates of the hand RELATIVE TO THE SHOULDER.
-
-            h is simply calculated by measuring the forward distance from the shoulder to the hand.
-            This is notably different from the straight line distance from the shoulder, directly
-            to the hand.
-            Here we are determining how far in the anterior, or straight ahead, direction the
-            hand is.
-            Since the input distance that the user is measuring in this case is coming in
-            as inches, we convert it to meters.     MUST BE IN METERS FOR PART B TO WORK.
-
-            v is calculated one of two ways.
-            Before asking the user for the hand height input, the user is prompted
-            to answer whether they are standing or sitting.
-            If the user is standing, then they will be asked for the height of their
-            hand relative to the ground.
-            To determine the v value in this case, we will calculate the difference between the
-            hand height value and the height of the average female shoulder from the ground.
-            If the user is sitting, then they will measure their hand height from
-            the seat of the chair.
-            v will be calculated as the difference between their hand height and the
-            height of the average female shoulder from the seat of the chair.
-            Either way, the v value is converted from inches to METERS.
-
-            l is calculated as the lateral distance from the shoulder to where the hand is
-            (side to side direction).
-            The user will first enter whether their hand is centered in front of their
-            shoulder, positioned on the inside (towards the opposit shoulder), or positioned
-            on the outside (away from body).
-            If the user selects Centered, then a value of 0 will be entered for l.
-            Otherwise, the user will be prompted to enter the distance inward or outward 
-            as a positive number either way.
-            If the user entered Inside, then the number will be converted to negative.
-            All non-zero results are converted to METERS.
-
-        Part b: 
-
-            This part mostly just involves a switch case that checks the force direction
-            input for the task currently selected and runs a specific equation that uses
-            predetermined coefficients and the variables calculated in part a.
-            
-            This gives a 'temp' value, which is used to determine the mean and standard
-            deviation values.
-
-        Part c:
-
-            Finally, we create a task object.
-
-            This contains all of the 'normal' task information (name, number, hand, count,
-            magnitude, duration) as well as the new information (male and female mean and 
-            standard deviation).
-
-            This object is pushed to the output array, and then the loop loops.
+    2.  calculateMean
         
+        This function is called by the createTask function to calculate the baseline mean strength
+        in a given direction at the provided hand coordinates.
 
-        At the end (once the loop ends), the full output array is returned.
+        The function was separated so that we could call it twice, once for the female mean value
+        and once for the male, since their hand coordinates are different due to different average shoulder
+        heights and torso lengths.
 
-        */
+        It takes in parameters for the vertical coordinate (v), the horizontal coordinate (h),
+        the lateral coordinate (l), and the direction in which the force is being applied (direction).
+
+        Function returns the base FEMALE mean value at the given shoulder height.
+
+*/
 
 function createTask(input) {
 
-    let h
-    let v
-    let l
+    let verticalCoordinateFemale
+    let verticalCoordinateMale
+    let horizontalCoordinate
+    let lateralCoordinate
 
     let output = new Array()
 
@@ -265,68 +209,45 @@ function createTask(input) {
             input[i].handPosition_verticalHeight = input[i].handPosition_verticalHeight*inchToMeterRatio
             input[i].handPosition_horizontalDistance = input[i].handPosition_horizontalDistance*inchToMeterRatio
             input[i].handPosition_lateralDistance = input[i].handPosition_lateralDistance*inchToMeterRatio
+
             input[i].forceMagnitude = input[i].forceMagnitude/newtonsToPoundsRatio
         }
 
-        v = 0
-        h = 0
-        l = 0
-                
+        verticalCoordinateFemale = 0
+        verticalCoordinateMale = 0
+        horizontalCoordinate = 0
+        lateralCoordinate = 0
+
         if(input[i].posture === "Standing") {
-            v = ((input[i].handPosition_verticalHeight) - (averageFemaleShoulderHeight)) // m
+            verticalCoordinateFemale = ((input[i].handPosition_verticalHeight) - (averageFemaleShoulderHeight)) // m
+            verticalCoordinateMale = ((input[i].handPosition_verticalHeight) - (averageMaleShoulderHeight))
         } else {
-            v = ((input[i].handPosition_verticalHeight) - (averageFemaleTorsoLength)) // m
+            verticalCoordinateFemale = ((input[i].handPosition_verticalHeight) - (averageFemaleTorsoLength))
+            verticalCoordinateMale = ((input[i].handPosition_verticalHeight) - (averageMaleTorsoLength)) // m
         }
 
-        h = input[i].handPosition_horizontalDistance // m
+        horizontalCoordinate = input[i].handPosition_horizontalDistance // m
 
         switch (input[i].handPosition_lateralDirection) {
             case 'Inside':
-                l = ((-1)*(input[i].handPosition_lateralDistance)) // m
+                lateralCoordinate = ((-1)*(input[i].handPosition_lateralDistance)) // m
                 break
             case 'Centered':
-                l = 0
+                lateralCoordinate = 0
                 break
             case 'Outside':
-                l = input[i].handPosition_lateralDistance // m
+                lateralCoordinate = input[i].handPosition_lateralDistance // m
                 break
             default:
         }
 
-        const absoluteHandDistance = Math.sqrt(h**2 + v**2 + l**2) // m
+        // if(Math.sqrt(verticalCoordinateFemale**2 + horizontalCoordinate**2 + lateralCoordinate**2)>maxFemaleArmLength || Math.sqrt(verticalCoordinateMale**2 + horizontalCoordinate**2 + lateralCoordinate**2)>maxMaleArmLength) {
+        //     console.log(`Task ${i+1} - possible error: hand too far away from body`)
+        // }
 
-        if(absoluteHandDistance > maxFemaleArmLength) {
-            console.log(`Error (Task ${i+1}: Hand position is too far away from the body.\n...`)
-        }
-
-        let temp = 0
-
-        switch (input[i].forceDirection) {
-            case 'Up': //Superior
-                temp = (100.7 + 91.93*(v**2) - 161.7*(h**2) - 179.03*(l**2) - 60.6*(h*v) + 58.21*(l*v))
-                break
-            case 'Down': //Inferior
-                temp = (140.2 + 208.72*(v) - 32.47*(l) - 46.37*(v**2) - 187.06*(h**2) - 169.46*(l**2) - 604.21*(v**3) - 220.40*(h*v) - 127.77*(l*v))
-                break
-            case 'Away': //Anterior
-                temp = (96.2 - 43.06*(v) - 31.34*(l) - 126.96*(v**2) + 181.93*(h**2) - 283.74*(l**2) + 147.23*(v**3) + 373.58*(l**3) + 32.08*(l*v))
-                break
-            case 'Toward': //Posterior
-                temp = (98.9 - 36.73(l) - 139.18*(v**2) + 456.95*(h**2) - 391.98(l**2) - 496.04*(h**3) + 607.89*(l**3) - 171.07*(h*v) - 58.8*(l*v))
-                break
-            case 'Inward': //Medial
-                temp = (95.1 - 123.58*(v**2) - 226.49*(h**3) + 347.73*(l**3) - 61.24*(h*v) - 179.04*(l*v))
-                break
-            case 'Outward': //Lateral
-                temp = (55.4 + 68.94*(h) + 87.23*(l) - 315.53*(h**3) - 293.33*(h*l) + 45.4*(h*v))
-                break
-            default:
-                temp = 0
-        }
-
-        const femaleMean = temp // N
-        const femaleStdDev = (temp*(0.3)) // N
-        const maleMean = (temp*(1.5)) // N
+        const femaleMean = calculateMean(verticalCoordinateFemale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection) // N
+        const femaleStdDev = (femaleMean*(0.3)) // N
+        const maleMean = (calculateMean(verticalCoordinateMale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection)*(1.5)) // N
         const maleStdDev = (maleMean*(0.3)) // N
 
         let task = new Object()
@@ -337,7 +258,6 @@ function createTask(input) {
         task.ForceMagnitude = input[i].forceMagnitude // N
         task.ForceCount = input[i].forceCount
         task.ForceDuration = input[i].forceDuration // sec
-
         task.MaleMean = maleMean // N
         task.MaleStdDev = maleStdDev // N
         task.FemaleMean = femaleMean // N
@@ -345,31 +265,61 @@ function createTask(input) {
 
         output.push(task)
     }
-    console.log("Task array:", output)
+    
     return output
 }
 
-/* END createTasks FUNCTION - CLS
+function calculateMean(v, h, l, direction) {
+    let mean
+
+    switch (direction) {
+        case 'Up': //Superior
+            mean = (100.7 + 91.93*(v**2) - 161.7*(h**2) - 179.03*(l**2) - 60.6*(h*v) + 58.21*(l*v))
+            break
+        case 'Down': //Inferior
+            mean = (140.2 + 208.72*(v) - 32.47*(l) - 46.37*(v**2) - 187.06*(h**2) - 169.46*(l**2) - 604.21*(v**3) - 220.40*(h*v) - 127.77*(l*v))
+            break
+        case 'Away': //Anterior
+            mean = (96.2 - 43.06*(v) - 31.34*(l) - 126.96*(v**2) + 181.93*(h**2) - 283.74*(l**2) + 147.23*(v**3) + 373.58*(l**3) + 32.08*(l*v))
+            break
+        case 'Toward': //Posterior
+            mean = (98.9 - 36.73(l) - 139.18*(v**2) + 456.95*(h**2) - 391.98(l**2) - 496.04*(h**3) + 607.89*(l**3) - 171.07*(h*v) - 58.8*(l*v))
+            break
+        case 'Inward': //Medial
+            mean = (95.1 - 123.58*(v**2) - 226.49*(h**3) + 347.73*(l**3) - 61.24*(h*v) - 179.04*(l*v))
+            break
+        case 'Outward': //Lateral
+            mean = (55.4 + 68.94*(h) + 87.23*(l) - 315.53*(h**3) - 293.33*(h*l) + 45.4*(h*v))
+            break
+        default:
+            mean = 0
+    }
+
+    return mean
+}
+
+/* END task creator functions - CLS
 */
 
 /*  task creator MAIN
 
-    Contains constants that are used in part a of the 'createTasks' function.
+    Contains constants.
 
     Creates a constant 'tasks' which is used by the calculator as the input array.
     This array is filled by the returning output array from the 'createTasks' function.
 
 */
 
-const averageFemaleShoulderHeight = 1.3716 // meters = 54 inches
-const averageFemaleTorsoLength = 0.5588 // Found on the internet? in meters = 22 inches
-const maxFemaleArmLength = 0.762 // Suggested by Murray - in meters = 30 inches
+const averageFemaleShoulderHeight = 1.3550 // meters
+const averageMaleShoulderHeight = 1.4300 // meters
+const averageFemaleTorsoLength = 0.6150 // meters
+const averageMaleTorsoLength = 0.6600 // meters
+const maxFemaleArmLength = 0.762 // meters
+const maxMaleArmLength = 0.9144 // meters
 const averageFemaleArmLength = 0.6
 
 const inchToMeterRatio = 0.0254
 const newtonsToPoundsRatio = 0.224809
-
-
 
 const tasks = createTask(input)
 
