@@ -31,10 +31,10 @@ const input = [
         hand: "Right",
         posture: "Standing",
         forceDirection: "Up",
-        handPosition_verticalHeight: "37.81", // inches
-        handPosition_horizontalDistance: "7.01", // inches
+        handPosition_verticalHeight: "78.35", // inches
+        handPosition_horizontalDistance: "15.00", // inches
         handPosition_lateralDirection: "Outside", 
-        handPosition_lateralDistance: "7.05", // inches 
+        handPosition_lateralDistance: "7.06", // inches 
         forceCount: "1",
         forceMagnitude: "1", // lbs
         forceDuration: "1"
@@ -80,6 +80,7 @@ const input = [
     }
 ]
 
+
 /* PART 2 - FUNCTIONS
 
     1.  createTask 
@@ -114,81 +115,44 @@ const input = [
         Function returns the base FEMALE mean value at the given shoulder height.
 */
 
-function createTask(input) {
 
-    let verticalCoordinateFemale
-    let verticalCoordinateMale
-    let horizontalCoordinate
-    let lateralCoordinate
-
-    let output = new Array()
-
+function convertUnits(input) {
     for(let i = 0; i < input.length; i++) {
 
-        if (!isUnitMetric){
-            input[i].handPosition_verticalHeight = input[i].handPosition_verticalHeight*inchToMeterRatio
-            input[i].handPosition_horizontalDistance = input[i].handPosition_horizontalDistance*inchToMeterRatio
-            input[i].handPosition_lateralDistance = input[i].handPosition_lateralDistance*inchToMeterRatio
+        input[i].handPosition_verticalHeight = input[i].handPosition_verticalHeight*inchToMeterRatio
+        input[i].handPosition_horizontalDistance = input[i].handPosition_horizontalDistance*inchToMeterRatio
+        input[i].handPosition_lateralDistance = input[i].handPosition_lateralDistance*inchToMeterRatio
 
-            input[i].forceMagnitude = input[i].forceMagnitude/newtonsToPoundsRatio
-        }
-
-        verticalCoordinateFemale = 0
-        verticalCoordinateMale = 0
-        horizontalCoordinate = 0
-        lateralCoordinate = 0
-
-        if(input[i].posture === "Standing") {
-            verticalCoordinateFemale = ((input[i].handPosition_verticalHeight) - (averageFemaleShoulderHeight)) // m
-            verticalCoordinateMale = ((input[i].handPosition_verticalHeight) - (averageMaleShoulderHeight))
-        } else {
-            verticalCoordinateFemale = ((input[i].handPosition_verticalHeight) - (averageFemaleTorsoLength))
-            verticalCoordinateMale = ((input[i].handPosition_verticalHeight) - (averageMaleTorsoLength)) // m
-        }
-
-        horizontalCoordinate = input[i].handPosition_horizontalDistance // m
-
-        switch (input[i].handPosition_lateralDirection) {
-            case 'Inside':
-                lateralCoordinate = ((-1)*(input[i].handPosition_lateralDistance)) // m
-                break
-            case 'Centered':
-                lateralCoordinate = 0
-                break
-            case 'Outside':
-                lateralCoordinate = input[i].handPosition_lateralDistance // m
-                break
-            default:
-        }
-
-        // if(Math.sqrt(verticalCoordinateFemale**2 + horizontalCoordinate**2 + lateralCoordinate**2)>maxFemaleArmLength || Math.sqrt(verticalCoordinateMale**2 + horizontalCoordinate**2 + lateralCoordinate**2)>maxMaleArmLength) {
-        //     console.log(`Task ${i+1} - possible error: hand too far away from body`)
-        // }
-
-        const femaleMean = calculateMean(verticalCoordinateFemale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection) // N
-        const femaleStdDev = (femaleMean*(0.3)) // N
-        const maleMean = (calculateMean(verticalCoordinateMale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection)*(1.5)) // N
-        const maleStdDev = (maleMean*(0.3)) // N
-
-        let task = new Object()
-
-        task.Task = (i + 1)
-        task.TaskName = input[i].taskName
-        task.Hand = input[i].hand
-        task.ForceMagnitude = input[i].forceMagnitude // N
-        task.ForceCount = input[i].forceCount
-        task.ForceDuration = input[i].forceDuration // sec
-        task.MaleMean = maleMean // N
-        task.MaleStdDev = maleStdDev // N
-        task.FemaleMean = femaleMean // N
-        task.FemaleStdDev = femaleStdDev // N
-
-        output.push(task)
+        input[i].forceMagnitude = input[i].forceMagnitude/newtonsToPoundsRatio
     }
-    
-    return output
 }
 
+function findVerticalCoordinate(verticalHeight, posture, shoulderHeight, torsoLength) {
+    if(posture === "Standing") {
+        return ((verticalHeight) - (shoulderHeight))
+    } else {
+        return ((verticalHeight) - (torsoLength))
+    }
+}
+
+function findHorizontalCoordinate(horizontalDistance) {
+    return horizontalDistance
+}
+
+function findLateralCoordinate(lateralDirection, lateralDistance) {
+    switch (lateralDirection) {
+        case 'Inside':
+            return ((-1)*(lateralDistance)) // m
+            break
+        case 'Centered':
+            return 0
+            break
+        case 'Outside':
+            return lateralDistance // m
+            break
+        default:
+    }
+}
 
 function calculateMean(v, h, l, direction) {
     let mean
@@ -219,6 +183,152 @@ function calculateMean(v, h, l, direction) {
     return mean
 }
 
+function checkHandPosition(input) {
+    let verticalCoordinateFemale
+    let horizontalCoordinate
+    let lateralCoordinate
+
+    for(let i = 0; i < input.length; i++) {
+
+        // console.log("___________________________________")
+        verticalCoordinateFemale = findVerticalCoordinate(input[i].handPosition_verticalHeight, input[i].posture, averageFemaleShoulderHeight, averageFemaleTorsoLength)
+        horizontalCoordinate = findHorizontalCoordinate(input[i].handPosition_horizontalDistance)
+        lateralCoordinate = findLateralCoordinate(input[i].handPosition_lateralDirection, input[i].handPosition_lateralDistance)
+
+        if(verticalCoordinateFemale >= 0.762) {
+            console.log("Task:", i+1, ": The vertical hand height entered is too far from the shoulder.")
+            return false
+        }else if(horizontalCoordinate >= 0.762) {
+            console.log("Task:", i+1, ": The horizontal hand position entered is too far from the shoulder.")
+            return false
+        }else if(lateralCoordinate >= 0.762) {
+            console.log("Task:", i+1, ": The lateral hand position entered is too far from the shoulder.")
+            return false
+        }
+
+        const absoluteHandDistance = Math.sqrt(verticalCoordinateFemale**2 + horizontalCoordinate**2 + lateralCoordinate**2)
+        
+        if(absoluteHandDistance > maxFemaleArmLength) {
+
+            console.log("Task:", i+1, ": The absolute distance (", absoluteHandDistance.toFixed(2), "meters / ", (absoluteHandDistance/inchToMeterRatio).toFixed(2), "inches ) from the shoulder to the hand is too long.")
+            console.log("You must change at least one of the hand position inputs.")
+            console.log("Calculating possible corrections. . .")
+
+
+            const verticalCoordinateSquared = maxFemaleArmLength**2 - horizontalCoordinate**2 - lateralCoordinate**2
+            const maxVerticalCoordinate = Math.sqrt(verticalCoordinateSquared)
+            let targetPosition_verticalHeight
+            if(input[i].posture === "Standing") {
+                if(input[i].handPosition_verticalHeight >= 0) { //above shoulder
+                    targetPosition_verticalHeight = averageFemaleShoulderHeight + maxVerticalCoordinate
+                } else { //below shoulder
+                    targetPosition_verticalHeight = averageFemaleShoulderHeight - maxVerticalCoordinate
+                }
+            } else {
+                if(input[i].handPosition_verticalHeight >= 0) { //above shoulder
+                    targetPosition_verticalHeight = averageFemaleTorsoLength + maxVerticalCoordinate
+                } else { //below shoulder
+                    targetPosition_verticalHeight = averageFemaleTorsoLength - maxVerticalCoordinate
+                }
+            }
+
+            const horizontalCoordinateSquared = (maxFemaleArmLength**2) - (verticalCoordinateFemale**2) - (lateralCoordinate**2)
+            const maxHorizontalCoordinate = Math.sqrt(horizontalCoordinateSquared)
+            let targetPosition_horizontalDistance = maxHorizontalCoordinate
+
+            const lateralCoordinateSquared = maxFemaleArmLength**2 - horizontalCoordinate**2 - verticalCoordinateFemale**2
+            const maxLateralCoordinate = Math.sqrt(lateralCoordinateSquared)
+            let targetPosition_lateralDistance
+            switch(input[i].handPosition_lateralDirection) {
+                case "Inside":
+                    targetPosition_lateralDistance = maxLateralCoordinate*(-1)
+                    break
+                case "Centered":
+                    targetPosition_lateralDistance = 0
+                    break
+                case "Outside":
+                    targetPosition_lateralDistance = maxLateralCoordinate
+                    break
+                default:
+            }
+
+
+            if(verticalCoordinateSquared < 0){
+                console.log("Task", i+1, ": There is no feasible vertical hand height that would work, given the other inputs.")
+            } else {
+                // console.log("Task", i+1, ": Maximum vertical hand position:", maxVerticalCoordinate)
+                if(input[i].handPosition_verticalHeight >= 0) {
+                    console.log("You could change the vertical hand height to:", (targetPosition_verticalHeight - 0.01).toFixed(2), "meters /", ((targetPosition_verticalHeight/inchToMeterRatio) - 0.01).toFixed(2), "inches")
+                } else {
+                    console.log("You could change the vertical hand height to:", (targetPosition_verticalHeight + 0.01).toFixed(2), "meters /", ((targetPosition_verticalHeight/inchToMeterRatio) + 0.01).toFixed(2), "inches")
+                }
+            }
+
+            if(horizontalCoordinateSquared < 0) {
+                console.log("Task", i+1, ": There is no feasible horizontal hand distance that would work, given the other inputs.")
+            } else {
+                // console.log("Task", i+1, ": Maximum horizontal hand position:", maxHorizontalCoordinate)
+                console.log("You could change the horizontal hand distance from the shoulder to:", (targetPosition_horizontalDistance-0.01).toFixed(2), "meters /", ((targetPosition_horizontalDistance/inchToMeterRatio)-0.01).toFixed(2), "inches")
+            }
+
+            if(lateralCoordinateSquared < 0) {
+                console.log("Task", i+1, ": There is no feasible lateral hand distance that would work, given the other inputs.")
+            } else {
+                // console.log("Task", i+1, ": Maximum lateral hand position:", maxLateralCoordinate)
+                console.log("You could change the lateral hand distance to:", (targetPosition_lateralDistance - 0.01).toFixed(2), "meters /", ((targetPosition_lateralDistance/inchToMeterRatio)-0.01).toFixed(2), "inches")
+            }
+
+            return false
+
+        }
+
+    }
+
+    return true
+}
+
+function createTask(input) {
+
+    let verticalCoordinateFemale
+    let verticalCoordinateMale
+    let horizontalCoordinate
+    let lateralCoordinate
+
+    let output = new Array()
+
+    for(let i = 0; i < input.length; i++) {
+
+        verticalCoordinateFemale = findVerticalCoordinate(input[i].handPosition_verticalHeight, input[i].posture, averageFemaleShoulderHeight, averageFemaleTorsoLength)
+        verticalCoordinateMale = findVerticalCoordinate(input[i].handPosition_verticalHeight, input[i].posture, averageMaleShoulderHeight, averageMaleTorsoLength)
+        horizontalCoordinate = findHorizontalCoordinate(input[i].handPosition_horizontalDistance)
+        lateralCoordinate = findLateralCoordinate(input[i].lateralDirection, input[i].lateralDistance)
+
+        const femaleMean = calculateMean(verticalCoordinateFemale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection) // N
+        const femaleStdDev = (femaleMean*(0.3)) // N
+        const maleMean = (calculateMean(verticalCoordinateMale, horizontalCoordinate, lateralCoordinate, input[i].forceDirection)*(1.5)) // N
+        const maleStdDev = (maleMean*(0.3)) // N
+
+        let task = new Object()
+
+        task.Task = (i + 1)
+        task.TaskName = input[i].taskName
+        task.Hand = input[i].hand
+        task.ForceMagnitude = input[i].forceMagnitude // N
+        task.ForceCount = input[i].forceCount
+        task.ForceDuration = input[i].forceDuration // sec
+        task.MaleMean = maleMean // N
+        task.MaleStdDev = maleStdDev // N
+        task.FemaleMean = femaleMean // N
+        task.FemaleStdDev = femaleStdDev // N
+
+        output.push(task)
+    }
+    
+    return output
+}
+
+
+
 /*  PART 3 - MAIN
 
     Contains constants.
@@ -229,22 +339,33 @@ function calculateMean(v, h, l, direction) {
 
 const averageFemaleShoulderHeight = 1.3550 // meters
 const averageMaleShoulderHeight = 1.4300 // meters
+
 const averageFemaleTorsoLength = 0.6150 // meters
 const averageMaleTorsoLength = 0.6600 // meters
+
 const maxFemaleArmLength = 0.762 // meters
 const maxMaleArmLength = 0.9144 // meters
+
 const averageFemaleArmLength = 0.6
 
 const inchToMeterRatio = 0.0254
 const newtonsToPoundsRatio = 0.224809
 
 
+if(!isUnitMetric) {
+    convertUnits(input)
+}
 
-const tasks = createTask(input)
+isInputValid = checkHandPosition(input)
+
+if(isInputValid) {
+    const tasks = createTask(input)
+    console.log(...tasks)
+}
 
 /*  PART 4 - CONSOLE LOG
 
     Not for use in actual calculator.
 */
+// console.log(...input)
 
-console.log(...tasks)
